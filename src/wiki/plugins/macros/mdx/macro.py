@@ -82,6 +82,33 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         args={},
     )
 
+    def ref(self, id, pmid=None, reference_text=None):
+        # Currently set up to allow for a separation between adding references without a reference list. It might be wise to add both in order to make parsing more efficient, since a reference list has to do basically the same thing.
+        # Also not sure that this is the right place for the function to get the count. I'm up to suggestions about a better place to put it.
+
+        html = render_to_string(
+            "wiki/plugins/macros/reference.html",
+            context={
+                "content": self.markdown.article.current_revision.content,
+                "id": id,
+                "pmid": pmid,
+                "reference_text": reference_text
+            }
+        )
+        base = "[REF id::{0}".format(id)
+        if pmid:
+            base += " pmid::{0}".format(pmid)
+        if reference_text:
+            base += " reference_text::{0}".format(reference_text)
+        base += "]"
+        return base
+    ref.meta = dict(
+        short_description=_('Reference'),
+        help_text=_('Insert a superscript reference. To add a bibliography, see "Bibliography"'),
+        example_code='[REF id::your custom id pmid:1234567] or [REF id::another custom id reference_text::Someone. 2020. Article title. Etc.]. You can refer to previous references using the id you provide by using [REF id::your custom id]',
+        args={'id': _('Any custom id; may be string or integer'), 'pmid': _('PubMed ID, as int. If provided, a PubMed reference will be built for you.'), 'reference_text': _('Your own reference text. If a PubMed ID is provided, this text will supercede the PubMed reference.')}
+    )
+
     def wikilink(self):
         return ""
 
