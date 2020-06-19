@@ -20,6 +20,7 @@ class MacroPlugin(BasePlugin):
         "wiki.plugins.macros.mdx.macro",
         "wiki.plugins.macros.mdx.toc",
         "wiki.plugins.macros.mdx.wikilinks",
+        "wiki.plugins.macros.mdx.references"
     ]
 
 
