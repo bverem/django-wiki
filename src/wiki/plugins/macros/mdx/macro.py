@@ -102,6 +102,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             base += " reference_text::{0}".format(reference_text)
         base += "]"
         return base
+        
     ref.meta = dict(
         short_description=_('Reference'),
         help_text=_('Insert a superscript reference. To add a bibliography, see "Bibliography"'),
