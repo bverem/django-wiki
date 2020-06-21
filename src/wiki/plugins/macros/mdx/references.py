@@ -56,24 +56,30 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                         line = doc[line_index] = line.replace(string_to_replace, '<sup>[Invalid reference format]</sup>')
 
         pubmed_ids = [str(ref['pmid']) for ref in reference_list if ref.get('pmid', False)]
+        print('PMIDS: ', pubmed_ids)
         pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={0}&retmode=json'.format(','.join(pubmed_ids))
         pubmed_get = requests.get(pubmed_url)
         pubmed_json = pubmed_get.json()
         if pubmed_json.get('esummaryresult', False) != ['Empty id list - nothing todo']:
-
             for pubmed_json_key in pubmed_json['result']['uids']:
                 if pubmed_json_key in pubmed_ids:
-                    linked_ref = next((ref for ref in reference_list if str(ref['pmid']) == pubmed_json_key), False)
+                    print(pubmed_json_key)
+                    print(reference_list)
+                    linked_ref = next((ref for ref in reference_list if str(ref.get('pmid',
+                    '-1')) == pubmed_json_key), False)
+
                     if linked_ref:
-                        linked_ref['authors'] = ', '.join([a['name'] for a in pubmed_json['result'][pubmed_json_key]['authors']])
-                        linked_ref['title'] = pubmed_json['result'][pubmed_json_key]['title']
-                        linked_ref['date'] = pubmed_json['result'][pubmed_json_key]['sortpubdate']
-                        linked_ref['journal'] = pubmed_json['result'][pubmed_json_key]['source']
-                        linked_ref['volume'] = pubmed_json['result'][pubmed_json_key]['volume']
-                        linked_ref['issue'] = pubmed_json['result'][pubmed_json_key]['issue']
-                        linked_ref['pages'] = pubmed_json['result'][pubmed_json_key]['pages']
-                        linked_ref['doi'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'doi'), False)
-                        linked_ref['pmc'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'pmc'), False)
+                        linked_ref['pubmed_success'] = True
+                        linked_ref['authors'] = ', '.join([a['name'] for a in pubmed_json['result'][pubmed_json_key].get('authors', '')])
+                        linked_ref['title'] = pubmed_json['result'][pubmed_json_key].get('title', '')
+                        linked_ref['date'] = pubmed_json['result'][pubmed_json_key].get('sortpubdate', '')
+                        linked_ref['journal'] = pubmed_json['result'][pubmed_json_key].get('source', '')
+                        linked_ref['volume'] = pubmed_json['result'][pubmed_json_key].get('volume', '')
+                        linked_ref['issue'] = pubmed_json['result'][pubmed_json_key].get('issue', '')
+                        linked_ref['pages'] = pubmed_json['result'][pubmed_json_key].get('pages', '')
+                        linked_ref['doi'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'doi'), '')
+                        linked_ref['pmc'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'pmc'), '')
+
 
         # Have to build the reflist later. NIH doesn't like tons of requests, so we'll generate a single request but we have to go through the whole doc first to get the PMIDs.
         for line_index, line in enumerate(doc):
@@ -84,9 +90,13 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                     # Reichart PA, Philipsen HP, Sonner S (March 1995). "Ameloblastoma: biological profile of 3677 cases". European Journal of Cancer, Part B. 31B (2): 86–99. doi:10.1016/0964-1955(94)00037-5. PMID 7633291.
                     if ref.get('reference_text', False):
                         refs_html_list.append('<a name={0}></a>{0}. {1}'.format(str(ref['number']), ref['reference_text']))
-                    elif ref.get('pmid', False):
-                        pmid_datetime = datetime.strptime(ref['date'], '%Y/%m/%d %H:%M')
+                    elif ref.get('pubmed_success', False):
                         pmid_ref = '<a name={0}></a>{0}.'.format(str(ref['number']))
+                        if ref['date']:
+                            pmid_datetime = datetime.strptime(ref['date'], '%Y/%m/%d %H:%M')
+                        else:
+                            pmid_datetime = ''
+
                         if ref['authors']:
                             pmid_ref += ' {0}.'.format(ref['authors'])
                         if ref['title']:
@@ -108,7 +118,6 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                         if ref['pmc']:
                             pmid_ref += ' PMC: [{0}.](https://ncbi.nlm.nih.gov/pmc/articles/{0}/)'.format(ref['pmc'])
                         pmid_ref += ' PMID: [{0}.](https://pubmed.ncbi.nlm.nih.gov/{0}/)'.format(ref['pmid'])
-
                         refs_html_list.append(pmid_ref)
                     else:
                         refs_html_list.append('{0}. Insufficient information for reference.'.format(str(ref['number'])))
