@@ -17,6 +17,7 @@ class ReferencesExtension(markdown.Extension):
 
         md.preprocessors.add('dw-references', ReferencesPreprocessor(md), '>html_block')
 
+
 class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
     """django-wiki references preprocessor - parse [ref] references. """
 
@@ -62,16 +63,17 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
 
             for pubmed_json_key in pubmed_json['result']['uids']:
                 if pubmed_json_key in pubmed_ids:
-                    linked_ref = next(ref for ref in reference_list if str(ref['pmid']) == pubmed_json_key)
-                    linked_ref['authors'] = ', '.join([a['name'] for a in pubmed_json['result'][pubmed_json_key]['authors']])
-                    linked_ref['title'] = pubmed_json['result'][pubmed_json_key]['title']
-                    linked_ref['date'] = pubmed_json['result'][pubmed_json_key]['sortpubdate']
-                    linked_ref['journal'] = pubmed_json['result'][pubmed_json_key]['source']
-                    linked_ref['volume'] = pubmed_json['result'][pubmed_json_key]['volume']
-                    linked_ref['issue'] = pubmed_json['result'][pubmed_json_key]['issue']
-                    linked_ref['pages'] = pubmed_json['result'][pubmed_json_key]['pages']
-                    linked_ref['doi'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'doi'), False)
-                    linked_ref['pmc'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'pmc'), False)
+                    linked_ref = next((ref for ref in reference_list if str(ref['pmid']) == pubmed_json_key), False)
+                    if linked_ref:
+                        linked_ref['authors'] = ', '.join([a['name'] for a in pubmed_json['result'][pubmed_json_key]['authors']])
+                        linked_ref['title'] = pubmed_json['result'][pubmed_json_key]['title']
+                        linked_ref['date'] = pubmed_json['result'][pubmed_json_key]['sortpubdate']
+                        linked_ref['journal'] = pubmed_json['result'][pubmed_json_key]['source']
+                        linked_ref['volume'] = pubmed_json['result'][pubmed_json_key]['volume']
+                        linked_ref['issue'] = pubmed_json['result'][pubmed_json_key]['issue']
+                        linked_ref['pages'] = pubmed_json['result'][pubmed_json_key]['pages']
+                        linked_ref['doi'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'doi'), False)
+                        linked_ref['pmc'] = next((id['value'] for id in pubmed_json['result'][pubmed_json_key]['articleids'] if id['idtype'] == 'pmc'), False)
 
         # Have to build the reflist later. NIH doesn't like tons of requests, so we'll generate a single request but we have to go through the whole doc first to get the PMIDs.
         for line_index, line in enumerate(doc):
