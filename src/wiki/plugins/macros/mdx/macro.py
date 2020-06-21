@@ -83,26 +83,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
     )
 
     def ref(self, id, pmid=None, reference_text=None):
-        # Currently set up to allow for a separation between adding references without a reference list. It might be wise to add both in order to make parsing more efficient, since a reference list has to do basically the same thing.
-        # Also not sure that this is the right place for the function to get the count. I'm up to suggestions about a better place to put it.
+        # All processing is done by plugins/macros/mdx/references.py
+        return ""
 
-        html = render_to_string(
-            "wiki/plugins/macros/reference.html",
-            context={
-                "content": self.markdown.article.current_revision.content,
-                "id": id,
-                "pmid": pmid,
-                "reference_text": reference_text
-            }
-        )
-        base = "[REF id::{0}".format(id)
-        if pmid:
-            base += " pmid::{0}".format(pmid)
-        if reference_text:
-            base += " reference_text::{0}".format(reference_text)
-        base += "]"
-        return base
-        
     ref.meta = dict(
         short_description=_('Reference'),
         help_text=_('Insert a superscript reference. To add a bibliography, see "Bibliography"'),

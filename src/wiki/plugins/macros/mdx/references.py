@@ -17,7 +17,6 @@ class ReferencesExtension(markdown.Extension):
 
         md.preprocessors.add('dw-references', ReferencesPreprocessor(md), '>html_block')
 
-
 class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
     """django-wiki references preprocessor - parse [ref] references. """
 
@@ -29,9 +28,9 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
             line_matches = REF_RE.findall(line)
             if line_matches:
                 for index, match in enumerate(line_matches):
+                    ref_number = None
                     kwarg_string = match[1].strip()
                     temp_dict = dict(re.findall(r'(?:(?<=\s)|(?<=^))(\S+?)::(.*?)(?=\s[^\s::]+::|$)', kwarg_string))
-                    #print(temp_dict)
                     if temp_dict.get('id', False) and (temp_dict.get('pmid', False) or temp_dict.get('reference_text', False)): # Don't want to add references that don't have an id
                         if temp_dict['id'] not in [d['id'] for d in reference_list]:
                             if temp_dict.get('pmid', False):
@@ -40,11 +39,20 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                             temp_dict['number'] = ref_number
                             reference_list.append(temp_dict)
                         else:
-                            ref_number = next(d for d in reference_list if d['id'] == temp_dict['id'])['number']
+                            ref_doc = next((d for d in reference_list if d['id'] == temp_dict['id']), False)
+                            if ref_doc:
+                                ref_number = ref_doc['number']
                     else:
-                        ref_number = next(d for d in reference_list if d['id'] == temp_dict['id'])['number']
-                    string_to_replace = '[{0}{1}]'.format(match[0], match[1])
-                    line = doc[line_index] = line.replace(string_to_replace, '<sup>[[{0}]](#{0})</sup>'.format(str(ref_number)))
+                        ref_doc = next((d for d in reference_list if d['id'] == temp_dict['id']), False)
+                        if ref_doc:
+                            ref_number = ref_doc['number']
+
+                    if ref_number:
+                        string_to_replace = '[{0}{1}]'.format(match[0], match[1])
+                        line = doc[line_index] = line.replace(string_to_replace, '<sup>[[{0}]](#{0})</sup>'.format(str(ref_number)))
+                    else:
+                        string_to_replace = '[{0}{1}]'.format(match[0], match[1])
+                        line = doc[line_index] = line.replace(string_to_replace, '<sup>[Invalid reference format]</sup>')
 
         pubmed_ids = [str(ref['pmid']) for ref in reference_list if ref.get('pmid', False)]
         pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={0}&retmode=json'.format(','.join(pubmed_ids))
@@ -68,7 +76,6 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
         # Have to build the reflist later. NIH doesn't like tons of requests, so we'll generate a single request but we have to go through the whole doc first to get the PMIDs.
         for line_index, line in enumerate(doc):
             reflist_match = REFLIST_RE.findall(line)
-            print(reflist_match)
             refs_html_list = []
             if reflist_match:
                 for ref in reference_list:
@@ -105,7 +112,6 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                         refs_html_list.append('{0}. Insufficient information for reference.'.format(str(ref['number'])))
 
             doc[line_index] = line.replace('[REFLIST]', '<br/>'.join(refs_html_list))
-
 
         return doc
 

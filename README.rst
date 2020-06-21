@@ -1,6 +1,9 @@
 django-wiki
 ===========
 
+Usage
+------------
+
 This fork of django-wiki is a work in progress to include Wikipedia-style references.
 
 There are two new macros: `[ref]` and `[reflist]`
@@ -30,3 +33,10 @@ If we want, we can reuse references.
     Simply use the same id as before.[ref id: Some string for this reference]
 
 Simply use the same id as before.<sup>[1]</sup>
+
+Additional improvements on the to-do list
+------------
+
+* MediaWiki-style templating system
+* Big editor for article edits
+* Allow references to anchors in WikiLinks
