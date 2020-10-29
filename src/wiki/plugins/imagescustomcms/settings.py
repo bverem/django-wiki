@@ -1,4 +1,6 @@
 from django.conf import settings as django_settings
+from django.urls import reverse
+from django.utils.module_loading import import_string
 from wiki.conf import settings as wiki_settings
 
 #SLUG = "images"
@@ -7,7 +9,12 @@ from wiki.conf import settings as wiki_settings
 #APP_LABEL = None
 
 #: Location where uploaded images are stored. ``%aid`` is replaced by the article id.
-IMAGE_PATH = getattr(django_settings, "WIKI_IMAGES_PATH", "wiki/images/%aid/")
+#IMAGE_PATH = getattr(django_settings, "WIKI_IMAGES_PATH", "wiki/images/%aid/")
+
+#: Path to images.
+#: To use model attributes in this path, use [attribute] in the path. models.upload_path will assume anything in brackets is going to be a model attribute for those of us with complex URL schemes.
+#: On second thought, let's just grab the path from the file.
+#IMAGECUSTOMCMS_PATH = '/public/[type]/[id]/[filename]'
 
 #: Size for the image thumbnail included in the HTML text. If no specific
 #: size is given in the markdown tag the ``default`` size is used. If a
@@ -43,3 +50,8 @@ THUMBNAIL_SIZES = getattr(
 #ANONYMOUS = getattr(
 #    django_settings, "WIKI_IMAGES_ANONYMOUS", wiki_settings.ANONYMOUS_UPLOAD
 #)
+
+#: ImageCustomCMS requires a custom form to be set in django_settings.
+#: Develop your own form to interact with your asset selection; image attributes to be
+#: set in markdown will be appended to that form.
+CMS_URL = "{0}{1}".format(django_settings.WIKI_IMAGECUSTOMCMS_DOMAIN, reverse(django_settings.WIKI_IMAGECUSTOMCMS_URL))

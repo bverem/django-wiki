@@ -1,7 +1,9 @@
-import markdown
+import markdown, requests
 from django.template.loader import render_to_string
-from wiki.plugins.images import models
-from wiki.plugins.images import settings
+from django.conf import settings as django_settings
+from wiki.plugins.imagescustomcms import models
+from wiki.plugins.imagescustomcms import settings
+
 
 IMAGE_RE = (
     r"(?:(?im)"
@@ -24,14 +26,15 @@ IMAGE_RE = (
     r"(?P<caption>(?:\n    [^\n]*)*))"
 )
 
+URL = settings.CMS_URL
 
 class ImageCustomCMSExtension(markdown.Extension):
 
     """ Images plugin markdown extension for django-wiki. """
 
     def extendMarkdown(self, md):
-        md.inlinePatterns.add("dw-images", ImagePattern(IMAGE_RE, md), ">link")
-        md.postprocessors.add("dw-images-cleanup", ImagePostprocessor(md), ">raw_html")
+        md.inlinePatterns.add("dw-images", ImageCustomCMSPattern(IMAGE_RE, md), ">link")
+        md.postprocessors.add("dw-images-cleanup", ImageCustomCMSPostprocessor(md), ">raw_html")
 
 
 class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
@@ -57,18 +60,20 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
         alignment = m.group("align")
         if m.group("size"):
             size = settings.THUMBNAIL_SIZES[m.group("size")]
-        try:
-            image = models.Image.objects.get(
-                article=self.markdown.article,
-                id=image_id,
-                current_revision__deleted=False,
-            )
-        except models.Image.DoesNotExist:
-            pass
+        if django_settings.DEBUG == True:
+            image_data = requests.get(URL, params={'asset_id': image_id, 'return_type': 'json'}, verify=False)
+        else:
+            image_data = requests.get(URL, params={'asset_id': image_id, 'return_type': 'json'})
+        print(image_data)
+        '''image = models.Image.objects.get(
+            article=self.markdown.article,
+            id=image_id,
+            current_revision__deleted=False,
+        )'''
 
         caption = m.group("caption")
         trailer = m.group("trailer")
-
+        '''
         caption_placeholder = "{{{IMAGECAPTION}}}"
         width = size.split("x")[0] if size else None
         html = render_to_string(
@@ -85,6 +90,8 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
         placeholder_before = self.markdown.htmlStash.store(html_before)
         placeholder_after = self.markdown.htmlStash.store(html_after)
         return placeholder_before + caption + placeholder_after + trailer
+        '''
+        return ''
 
 
 class ImageCustomCMSPostprocessor(markdown.postprocessors.Postprocessor):

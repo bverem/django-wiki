@@ -2,27 +2,24 @@ from django.urls import re_path
 from django.utils.translation import gettext as _
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin
-#from wiki.plugins.images import forms
-#from wiki.plugins.images import models
+from wiki.plugins.imagescustomcms import forms
 from wiki.plugins.imagescustomcms import settings
 from wiki.plugins.imagescustomcms import views
 from wiki.plugins.imagescustomcms.markdown_extensions import ImageCustomCMSExtension
-from common.forms import AssetSearchForm
-#from wiki.plugins.notifications.settings import ARTICLE_EDIT
-#from wiki.plugins.notifications.util import truncate_title
+from wiki.plugins.notifications.settings import ARTICLE_EDIT
+from wiki.plugins.notifications.util import truncate_title
 
 
 class ImageCustomCMSPlugin(BasePlugin):
 
-    #slug = settings.SLUG # This won't have slugs. We will define a custom model and path definition instead.
+    #slug = "image_cms" # This won't have slugs. We will define a custom model and path definition instead.
     sidebar = {
         "headline": _("Images (custom CMS)"),
         "icon_class": "fa-image",
-        "template": "wiki/plugins/imagescustomcms/sidebar.html", # Probably have to write the asset selection template here.
-        "form_class": None, # Maybe the asset selection form here.
+        "template": "wiki/plugins/imagescustomcms/sidebar.html", # Here goes just the sidebar. In that template, we'll simply include a link to open up the user-defined URL for selecting images.
+        "form_class": None, # The actual selection form goes in the sidebar. Will have to set that as an option somewhere.
         "get_form_kwargs": (lambda a: {}),
     }
-
     # I feel like the notifications module is such a low priority. Take care of it if you want.
     # List of notifications to construct signal handlers for. This
     # is handled inside the notifications plugin.
@@ -47,7 +44,7 @@ class ImageCustomCMSPlugin(BasePlugin):
 
         css = {"screen": "wiki/colorbox/example1/colorbox.css"}
 
-    urlpatterns = {
+    #urlpatterns = {
     # Will probably need to use this at some point
     # But don't need to manage images here. That's what the CMS is for.
     #
@@ -64,8 +61,7 @@ class ImageCustomCMSPlugin(BasePlugin):
     #            name="images_restore",
     #            kwargs={"restore": True},
     #        ),
-    #        re_path(
-    #            "^purge/(?P<image_id>[0-9]+)/$",
+    ##            "^purge/(?P<image_id>[0-9]+)/$",
     #            views.PurgeView.as_view(),
     #            name="images_purge",
     #        ),
@@ -80,7 +76,7 @@ class ImageCustomCMSPlugin(BasePlugin):
     #            name="images_add_revision",
     #        ),
     #    ]
-    }
+    #}
 
     markdown_extensions = [ImageCustomCMSExtension()]
 

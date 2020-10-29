@@ -12,6 +12,7 @@ from django.views.generic import RedirectView
 from wiki.conf import settings as wiki_settings
 from wiki.core.paginator import WikiPaginator
 from wiki.decorators import get_article
+from wiki import models
 #from wiki.models.pluginbase import RevisionPluginRevision
 #from wiki.plugins.images import forms
 #from wiki.plugins.images import models

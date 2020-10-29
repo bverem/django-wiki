@@ -1,57 +1,51 @@
-{% load i18n wiki_tags wiki_images_tags humanize wiki_thumbnails sekizai_tags %}
+{% load i18n wiki_tags humanize wiki_thumbnails sekizai_tags %}
 
+<!-- images plugin process:
+
+Upload image (1-1 with article)
+That gets inserted into the sidebar
+You click on Insert Image and select some additional attributes
+Submitting the form will add the appropriate markdown to the text
+-->
+
+<!-- My process
+Okay, so it's really hard to flexibly use a custom asset form with the requisite views/javascript/etc. So I'll just redirect to a page I control and copy stuff in. Should be much easier (and perhaps can refactor this to be a plugin like PubMed?)
+
+//Make a custom form in my app (search for an asset with fields for customization) and pass that as a wiki plugin option
+//Load said form in wiki_plugin (which will pass it here?) with appropriate kwargs
+//Onclick for Select Asset -> Open modal with form
+//Pick an asset and have additional attributes (ideally have a preview button)
+//Give the option to insertAtCaret or copy/pasta
+//Insert markdown into text or allow copy/pasta
+
+-->
 
 {% addtoblock "js" %}
 <script type="text/javascript">
-function insert_image(data) {
-    if (typeof data == "number") {
-        image_id = data;
-        $("#img_title").text(" {{ _("Insert Image")|escapejs }} " + image_id);
-        $("#img_modal").on('shown.bs.modal', function(){
-            $(this).find('#img_caption').focus();
-        });
-        $("#img_modal").modal();
-   } else {
-        align = data.img_align.options[data.img_align.selectedIndex].text;
-        size = data.img_size.options[data.img_size.selectedIndex].text;
-        caption = data.img_caption.value;
+function InsertMarkdown(assetID, assetType, action) {
+  // Parse data to make Tag
+  // Action either insertAtCaret or copy
 
-        data.img_align.selectedIndex = 0;
-        data.img_size.selectedIndex = 0;
-        data.img_caption.value = "";
-
-        tag = '\n[image:'+image_id;
-        if (align != "center") tag = tag + ' align:'+align;
-        if (size != "default") tag = tag + ' size:'+size;
-
-        if (caption == '')
-            $('#id_content').insertAtCaret(tag+']\n\n');
-        else
-            $('#id_content').insertAtCaret(tag+']\n    '+caption+'\n\n');
-    }
 }
-function add_image(form) {
-    $(form).submit();
+
+function openCustomForm(){
+  $('#custom_img_modal').show()
 }
 </script>
 {% endaddtoblock %}
+<h4>{% trans "Select an asset" %}</h4>
+<a href="{% url 'files.index' %}"><span class="fa fa-edit"></span> {% trans "Open asset search" %}</a><br />
 
+<h4>{% trans "How to use assets" %}</h4>
 
-<h4>{% trans "Add new image" %}</h4>
-
-
-<h4>
-  {% trans "How to use images" %}
-</h4>
-
-<p>{% trans "After uploading an image, it is attached to this particular article and can be used only here. Other users may replace the image, but older versions are kept. To show the image press the Insert button and select the options you want to use. You can use Markdown in the caption. The Markdown code syntax for images looks like this" %}<br/>
+<p>{% trans "Once an asset is selected, you'll receive the asset type and asset ID. You may then select the options you want to use. For the caption, you can use Markdown for additional customization. The Markdown code syntax for images looks like this" %}<br/>
 <pre>[image:id align:right size:orig]
     caption indented by 4 spaces</pre>
 {% trans "Possible values for align are" %} <pre>left | right</pre>
 {% trans "Possible values for size are" %} <pre>small | medium | large | orig | default</pre>
 </p>
 
-<div class="modal" id="img_modal" role="dialog">
+<div class="modal" id="custom_img_modal" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content" style="position:relative !important;">
       <div class="modal-header">
@@ -59,6 +53,7 @@ function add_image(form) {
       </div>
       <div class="modal-body">
         <form role="form">
+          {{ form }}
           <div class="form-group" style="margin-left:0; margin-right:0;">
             <label for="img_align">{% trans "Alignment" %}</label>
             <select class="form-control" id="img_align">

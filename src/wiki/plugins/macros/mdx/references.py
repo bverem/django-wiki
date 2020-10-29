@@ -56,15 +56,12 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                         line = doc[line_index] = line.replace(string_to_replace, '<sup>[Invalid reference format]</sup>')
 
         pubmed_ids = [str(ref['pmid']) for ref in reference_list if ref.get('pmid', False)]
-        print('PMIDS: ', pubmed_ids)
         pubmed_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={0}&retmode=json'.format(','.join(pubmed_ids))
         pubmed_get = requests.get(pubmed_url)
         pubmed_json = pubmed_get.json()
         if pubmed_json.get('esummaryresult', False) != ['Empty id list - nothing todo']:
             for pubmed_json_key in pubmed_json['result']['uids']:
                 if pubmed_json_key in pubmed_ids:
-                    print(pubmed_json_key)
-                    print(reference_list)
                     linked_ref = next((ref for ref in reference_list if str(ref.get('pmid',
                     '-1')) == pubmed_json_key), False)
 
