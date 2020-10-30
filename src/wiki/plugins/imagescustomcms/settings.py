@@ -1,6 +1,6 @@
 from django.conf import settings as django_settings
-from django.urls import reverse
 from django.utils.module_loading import import_string
+from wiki.models import reverse
 from wiki.conf import settings as wiki_settings
 
 #SLUG = "images"
@@ -51,7 +51,6 @@ THUMBNAIL_SIZES = getattr(
 #    django_settings, "WIKI_IMAGES_ANONYMOUS", wiki_settings.ANONYMOUS_UPLOAD
 #)
 
-#: ImageCustomCMS requires a custom form to be set in django_settings.
-#: Develop your own form to interact with your asset selection; image attributes to be
-#: set in markdown will be appended to that form.
-CMS_URL = "{0}{1}".format(django_settings.WIKI_IMAGECUSTOMCMS_DOMAIN, reverse(django_settings.WIKI_IMAGECUSTOMCMS_URL))
+IMAGECUSTOMCMS_VIEW = django_settings.WIKI_IMAGECUSTOMCMS_VIEW
+IMAGECUSTOMCMS_VIEW_METHOD = django_settings.WIKI_IMAGECUSTOMCMS_VIEW_METHOD
+IMAGECUSTOMCMS_DOMAIN = django_settings.WIKI_IMAGECUSTOMCMS_DOMAIN

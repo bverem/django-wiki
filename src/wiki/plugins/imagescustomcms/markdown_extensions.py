@@ -1,8 +1,13 @@
-import markdown, requests
+import markdown, urllib, json
 from django.template.loader import render_to_string
 from django.conf import settings as django_settings
+from django.http import HttpRequest, QueryDict
 from wiki.plugins.imagescustomcms import models
 from wiki.plugins.imagescustomcms import settings
+
+import importlib
+FILE_VIEWS = importlib.import_module(settings.IMAGECUSTOMCMS_VIEW)
+FILE_METHOD = getattr(FILE_VIEWS, settings.IMAGECUSTOMCMS_VIEW_METHOD)
 
 
 IMAGE_RE = (
@@ -26,7 +31,7 @@ IMAGE_RE = (
     r"(?P<caption>(?:\n    [^\n]*)*))"
 )
 
-URL = settings.CMS_URL
+
 
 class ImageCustomCMSExtension(markdown.Extension):
 
@@ -41,17 +46,13 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
     """
     django-wiki image preprocessor
     Parse text for [image:N align:ALIGN size:SIZE] references.
-
     For instance:
-
     [image:id align:left|right]
         This is the caption text maybe with [a link](...)
-
     So: Remember that the caption text is fully valid markdown!
     """
 
     def handleMatch(self, m):
-        image = None
         image_id = None
         alignment = None
         size = settings.THUMBNAIL_SIZES["default"]
@@ -60,38 +61,38 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
         alignment = m.group("align")
         if m.group("size"):
             size = settings.THUMBNAIL_SIZES[m.group("size")]
-        if django_settings.DEBUG == True:
-            image_data = requests.get(URL, params={'asset_id': image_id, 'return_type': 'json'}, verify=False)
-        else:
-            image_data = requests.get(URL, params={'asset_id': image_id, 'return_type': 'json'})
-        print(image_data)
-        '''image = models.Image.objects.get(
-            article=self.markdown.article,
-            id=image_id,
-            current_revision__deleted=False,
-        )'''
 
-        caption = m.group("caption")
-        trailer = m.group("trailer")
-        '''
-        caption_placeholder = "{{{IMAGECAPTION}}}"
-        width = size.split("x")[0] if size else None
-        html = render_to_string(
-            "wiki/plugins/imagescustomcms/render.html",
-            context={
-                "image": image,
-                "caption": caption_placeholder,
-                "align": alignment,
-                "size": size,
-                "width": width,
-            },
-        )
-        html_before, html_after = html.split(caption_placeholder)
-        placeholder_before = self.markdown.htmlStash.store(html_before)
-        placeholder_after = self.markdown.htmlStash.store(html_after)
-        return placeholder_before + caption + placeholder_after + trailer
-        '''
-        return ''
+        # Originally was just going to reverse, but I can't figure out how to deal with django-wiki's reverse override. So I'll access the method directly.
+        qdict = QueryDict(urllib.parse.urlencode({'asset_id': image_id, 'return_type': 'json'}))
+        request = HttpRequest()
+        request.method = 'GET'
+        request.GET = qdict
+        image_data = FILE_METHOD(request).content
+        if image_data:
+            image_data = json.loads(image_data)
+            print(image_data)
+            image_data['url'] = settings.IMAGECUSTOMCMS_DOMAIN + image_data['url'] # Maybe I can remove this by rendering with Django?
+            caption = m.group("caption")
+            trailer = m.group("trailer")
+
+            caption_placeholder = "{{{IMAGECAPTION}}}"
+            width = size.split("x")[0] if size else None
+            html = render_to_string(
+                "wiki/plugins/imagescustomcms/render.html",
+                context={
+                    "image_data": image_data,
+                    "caption": caption_placeholder,
+                    "align": alignment,
+                    "size": size,
+                    "width": width,
+                },
+            )
+            html_before, html_after = html.split(caption_placeholder)
+            placeholder_before = self.markdown.htmlStash.store(html_before)
+            placeholder_after = self.markdown.htmlStash.store(html_after)
+            return placeholder_before + caption + placeholder_after + trailer
+        else:
+            return ''
 
 
 class ImageCustomCMSPostprocessor(markdown.postprocessors.Postprocessor):

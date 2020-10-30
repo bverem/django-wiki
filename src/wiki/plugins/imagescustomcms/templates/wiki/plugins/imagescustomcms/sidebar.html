@@ -20,21 +20,8 @@ Okay, so it's really hard to flexibly use a custom asset form with the requisite
 
 -->
 
-{% addtoblock "js" %}
-<script type="text/javascript">
-function InsertMarkdown(assetID, assetType, action) {
-  // Parse data to make Tag
-  // Action either insertAtCaret or copy
-
-}
-
-function openCustomForm(){
-  $('#custom_img_modal').show()
-}
-</script>
-{% endaddtoblock %}
 <h4>{% trans "Select an asset" %}</h4>
-<a href="{% url 'files.index' %}"><span class="fa fa-edit"></span> {% trans "Open asset search" %}</a><br />
+<a href=""><span class="fa fa-edit"></span> {% trans "Open asset search" %}</a><br />
 
 <h4>{% trans "How to use assets" %}</h4>
 
