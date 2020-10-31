@@ -4,20 +4,20 @@
   NB! Watch out for line breaks, markdown might add <br />s and <p>s.
 {% endcomment %}
 {% spaceless %}
-<figure class="thumbnail{% if align %} float-{{ align }}{% endif %}" {% if width %} style="width: {{ width }}px;" {% endif %}>
-    <a href="{{ image_data.url }}">
+<figure class="figure thumbnail border rounded p-2{% if align %} float-{{ align }}{% endif %}" style="{% if width %}width: {{ width }}px; {% endif %}display:table; caption-side:bottom;">
+    <a href="{{ image_data.url }}" data-id="{{ image_data.id }}">
 {% if size %}
-  {% thumbnail image_data.url size upscale=False as thumb %}
+  {% thumbnail image_data.sorl_url size upscale=False as thumb %}
       <img src="{{ thumb.url }}" />
   {% empty %}
       <div class="caption">
-        <em>{% trans "Image not found" %}</em>
+        <em>{% trans "Thumbnail not found" %}</em>
       </div>
   {% endthumbnail %}
 {% else %}
       <img src="{{ image_data.url }}" />
 {% endif %}
     </a>
-  <figcaption class="caption">{{ caption|safe }}</figcaption>
+  <figcaption class="figure-caption" style="display:table-caption;">{{ caption|safe }}</figcaption>
 </figure>
 {% endspaceless %}

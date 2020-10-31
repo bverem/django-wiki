@@ -20,55 +20,14 @@ Okay, so it's really hard to flexibly use a custom asset form with the requisite
 
 -->
 
-<h4>{% trans "Select an asset" %}</h4>
-<a href=""><span class="fa fa-edit"></span> {% trans "Open asset search" %}</a><br />
+<h4>{% trans "Select an image" %}</h4>
+<a href="{% url 'files.index' %}" target="_blank" rel="noopener"><span class="fa fa-edit"></span> {% trans "Open image search" %}</a><br />
 
-<h4>{% trans "How to use assets" %}</h4>
+<h5>{% trans "How to use images" %}</h5>
 
-<p>{% trans "Once an asset is selected, you'll receive the asset type and asset ID. You may then select the options you want to use. For the caption, you can use Markdown for additional customization. The Markdown code syntax for images looks like this" %}<br/>
+<p>{% trans "Open the Files search and find the image you want. You can copy the template from that image's info page in Files. Paste it where you want, but make sure it's in its own line (it can break references). You can then edit the options you want to use. For the caption, you can use Markdown for additional customization. The Markdown code syntax for images looks like this" %}<br/>
 <pre>[image:id align:right size:orig]
     caption indented by 4 spaces</pre>
 {% trans "Possible values for align are" %} <pre>left | right</pre>
 {% trans "Possible values for size are" %} <pre>small | medium | large | orig | default</pre>
 </p>
-
-<div class="modal" id="custom_img_modal" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content" style="position:relative !important;">
-      <div class="modal-header">
-        <h4 id="img_title"></h4>
-      </div>
-      <div class="modal-body">
-        <form role="form">
-          {{ form }}
-          <div class="form-group" style="margin-left:0; margin-right:0;">
-            <label for="img_align">{% trans "Alignment" %}</label>
-            <select class="form-control" id="img_align">
-              <option>center</option>
-              <option>left</option>
-              <option>right</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-left:0; margin-right:0;">
-            <label for="img_size">{% trans "Size" %}</label>
-            <select class="form-control" id="img_size">
-              <option>default</option>
-              <option>small</option>
-              <option>medium</option>
-              <option>large</option>
-              <option>orig</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-left:0; margin-right:0;">
-            <label for="img_caption">{% trans "Caption" %}</label>
-            <input type="text" class="form-control" id="img_caption" placeholder="{% trans "Enter caption" %}">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-success btn-secondary" data-dismiss="modal" onClick="insert_image(this.form)"> {% trans "Insert image" %} </button>
-        <button class="btn btn-danger" data-dismiss="modal"> {% trans "Cancel" %} </button>
-      </div>
-    </div>
-  </div>
-</div>

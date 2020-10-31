@@ -12,9 +12,9 @@ from wiki.plugins.notifications.util import truncate_title
 
 class ImageCustomCMSPlugin(BasePlugin):
 
-    #slug = "image_cms" # This won't have slugs. We will define a custom model and path definition instead.
+    slug = "image_cms"
     sidebar = {
-        "headline": _("Images (custom CMS)"),
+        "headline": _("Images"),
         "icon_class": "fa-image",
         "template": "wiki/plugins/imagescustomcms/sidebar.html", # Here goes just the sidebar. In that template, we'll simply include a link to open up the user-defined URL for selecting images.
         "form_class": None, # The actual selection form goes in the sidebar. Will have to set that as an option somewhere.

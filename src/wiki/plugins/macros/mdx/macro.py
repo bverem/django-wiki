@@ -83,13 +83,12 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
     )
 
     def ref(self, id, pmid=None, reference_text=None):
-        # All processing is done by plugins/macros/mdx/references.py
         return ""
 
     ref.meta = dict(
         short_description=_('Reference'),
-        help_text=_('Insert a superscript reference. To add a bibliography, see "Bibliography"'),
-        example_code='[REF id::your custom id pmid:1234567] or [REF id::another custom id reference_text::Someone. 2020. Article title. Etc.]. You can refer to previous references using the id you provide by using [REF id::your custom id]',
+        help_text=_('Insert a superscript reference. To add a bibliography, type in [REFLIST], ideally at the end of the article.'),
+        example_code='[REF id::your custom id pmid::1234567] or [REF id::another custom id reference_text::Someone. 2020. Article title. Etc.]. You can refer to previous references using the id you provide by using [REF id::your custom id]', # Use two colons because a single colon is often used in manual references.
         args={'id': _('Any custom id; may be string or integer'), 'pmid': _('PubMed ID, as int. If provided, a PubMed reference will be built for you.'), 'reference_text': _('Your own reference text. If a PubMed ID is provided, this text will supercede the PubMed reference.')}
     )
 
