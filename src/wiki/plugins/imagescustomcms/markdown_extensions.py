@@ -1,5 +1,6 @@
 import markdown, urllib, json
 from django.template.loader import render_to_string
+from django.contrib.auth.models import AnonymousUser
 from django.conf import settings as django_settings
 from django.http import HttpRequest, QueryDict
 from wiki.plugins.imagescustomcms import models
@@ -9,6 +10,7 @@ import importlib
 FILE_VIEWS = importlib.import_module(settings.IMAGECUSTOMCMS_VIEW)
 FILE_METHOD = getattr(FILE_VIEWS, settings.IMAGECUSTOMCMS_VIEW_METHOD)
 
+#FILE_MODEL = getattr(importlib.import_module(settings.IMAGECUSTOMCMS_MODEL_APP), settings.IMAGECUSTOMCMS_MODEL)
 
 IMAGE_RE = (
     r"(?:(?im)"
@@ -67,11 +69,13 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
         request = HttpRequest()
         request.method = 'GET'
         request.GET = qdict
+        request.user = AnonymousUser()
         image_data = FILE_METHOD(request).content
         if image_data:
             image_data = json.loads(image_data)
+            image_data['full_url'] = settings.IMAGECUSTOMCMS_DOMAIN + image_data['url'] # Maybe I can remove this by rendering with Django?
+            image_data['sorl_url'] = '/'.join(image_data['url'].split('/')[2:]) # Apparently sorl will try to be helpful and include MEDIA_ROOT in the URL, which Django already does with file.url; this makes the URL contain an extra MEDIA_ROOT folder and a subsequent error.
             print(image_data)
-            image_data['url'] = settings.IMAGECUSTOMCMS_DOMAIN + image_data['url'] # Maybe I can remove this by rendering with Django?
             caption = m.group("caption")
             trailer = m.group("trailer")
 
