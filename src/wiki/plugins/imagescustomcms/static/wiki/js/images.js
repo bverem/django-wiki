@@ -6,7 +6,6 @@ $(document).ready(function() {
     $(this).children('a').on('click', function(e){
       e.preventDefault();
       asset_id = $(this).attr('data-id');
-      console.log(asset_id)
       getFileModal(asset_id);
     })
   });

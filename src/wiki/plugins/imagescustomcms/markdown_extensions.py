@@ -74,8 +74,10 @@ class ImageCustomCMSPattern(markdown.inlinepatterns.Pattern):
         if image_data:
             image_data = json.loads(image_data)
             image_data['full_url'] = settings.IMAGECUSTOMCMS_DOMAIN + image_data['url'] # Maybe I can remove this by rendering with Django?
-            image_data['sorl_url'] = '/'.join(image_data['url'].split('/')[2:]) # Apparently sorl will try to be helpful and include MEDIA_ROOT in the URL, which Django already does with file.url; this makes the URL contain an extra MEDIA_ROOT folder and a subsequent error.
-            print(image_data)
+            if django_settings.DEBUG == True:
+                image_data['sorl_url'] = '/'.join(image_data['url'].split('/')[2:]) # Apparently sorl will try to be helpful and include MEDIA_ROOT in the URL, which Django already does with file.url; this makes the URL contain an extra MEDIA_ROOT folder and a subsequent error.
+            elif django_settings.DEBUG == False:
+                image_data['sorl_url'] = image_data['url'] # But! In production, the url is actually the full url. Woof.
             caption = m.group("caption")
             trailer = m.group("trailer")
 
