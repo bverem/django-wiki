@@ -111,10 +111,10 @@ class ReferencesPreprocessor(markdown.preprocessors.Preprocessor):
                         if ref['pages']:
                             pmid_ref += ':{0}.'.format(ref['pages'])
                         if ref['doi']:
-                            pmid_ref += ' [doi:{0}.](https://doi.org/{0})'.format(ref['doi'])
+                            pmid_ref += ' <a href="https://doi.org/{0}" target="_blank" rel="noopener">doi:{0}.</a>'.format(ref['doi'])
                         if ref['pmc']:
-                            pmid_ref += ' PMC: [{0}.](https://ncbi.nlm.nih.gov/pmc/articles/{0}/)'.format(ref['pmc'])
-                        pmid_ref += ' PMID: [{0}.](https://pubmed.ncbi.nlm.nih.gov/{0}/)'.format(ref['pmid'])
+                            pmid_ref += ' <a href="https://ncbi.nlm.nih.gov/pmc/articles/{0}/" target="_blank" rel="noopener">PMC: {0}.</a>'.format(ref['pmc'])
+                        pmid_ref += ' <a href="https://pubmed.ncbi.nlm.nih.gov/{0}/" target="_blank" rel="noopener">PMID: {0}.</a>'.format(ref['pmid'])
                         refs_html_list.append(pmid_ref)
                     else:
                         refs_html_list.append('{0}. Insufficient information for reference.'.format(str(ref['number'])))
